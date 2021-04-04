@@ -7,6 +7,7 @@ public class TEST
 		// TODO Auto-generated method stub
 		
 		System.out.print("It work, time to code");
+		System.out.print("Test Two");
 
 	}
 
