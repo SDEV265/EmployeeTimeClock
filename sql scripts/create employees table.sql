@@ -1,4 +1,4 @@
-create table tblusers(
+create table tblemployees(
 clocknumber integer not null,
 lastname varchar (15),
 firstname varchar (15),
