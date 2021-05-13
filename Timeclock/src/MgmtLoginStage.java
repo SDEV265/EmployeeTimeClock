@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,16 +31,23 @@ public class MgmtLoginStage {
 	Button btnLogout = new Button("Logout");
 	Label lblNotice = new Label("");
 	
+	String strUser,strPassword,strChkPass,strRole;
+	
 	private static Connection connection;
 	
 	final static ObservableList listUsers = FXCollections.observableArrayList();
+	static ObservableList listUsersToo = FXCollections.observableArrayList();
+	ArrayList<String> listClockNumbers = new ArrayList<>();
 	ComboBox<String> cmboUsers = new ComboBox<String>(listUsers);
 	
 	BorderPane pane = new BorderPane();
 	
-	MgmtLoginStage() throws ClassNotFoundException, SQLException{
+	MgmtLoginStage(ObservableList newListUsers, ArrayList newListClockNumbers) throws ClassNotFoundException, SQLException{
 		
 		Stage mgmtLoginStage = new Stage();
+		
+		listUsersToo = newListUsers;
+		listClockNumbers = newListClockNumbers;
 		
 		if(listUsers.isEmpty()) {
 			//fills User combobox
@@ -78,7 +86,38 @@ public class MgmtLoginStage {
     	mgmtLoginPane.add(lblNotice,3,6);
     	
     	btnLogin.setOnAction(e->{
-			
+    		strUser = (String)cmboUsers.getValue();
+			strPassword = tfPassword.getText();
+			//password query
+			String strVerify = "SELECT tblUsers.Password, tblUsers.Role FROM tblUsers WHERE (((tblUsers.UserName) = '" + strUser +"'));";
+			System.out.println(strVerify);
+			//Extracting password from database
+			ResultSet rsPassword;
+			try {
+				PreparedStatement preparedStatement = connection.prepareStatement(strVerify);
+				rsPassword = preparedStatement.executeQuery();
+				while (rsPassword.next()) {
+					strChkPass = rsPassword.getString("Password");
+					strRole = rsPassword.getString("Role");
+				}//end while
+			} catch (SQLException e1) {
+					e1.printStackTrace();
+			}//end try/catch
+			System.out.println("password = " + strChkPass + "=" + strPassword);
+			if( (cmboUsers.getValue().equals("Select")) || tfPassword.getText().isEmpty() || (!strPassword.equals(strChkPass))){
+				lblNotice.setText("Access Denied: Invalid Entry!");
+			}else if(strPassword.equals(strChkPass)) {
+				strUser = "Current User: "+strUser;
+				strRole = "Role: "+strRole;
+					try {
+						new MgmtMenuStage(strUser, strRole, listUsersToo, listClockNumbers);
+						mgmtLoginStage.close();
+					} catch (ClassNotFoundException e1) {
+						e1.printStackTrace();
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}//end try catch/catch
+			}//end if resultSet equals password
 		});
     	
     	btnLogout.setOnAction(e->{
@@ -106,7 +145,7 @@ public class MgmtLoginStage {
 	
 		mgmtLoginStage.setScene(sceneLogin);
 		mgmtLoginStage.show();
-    	
+    	mgmtLoginStage.setMaximized(true);
 		
 	}
 	
