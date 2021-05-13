@@ -1,0 +1,4 @@
+create table tblcountytax(
+county varchar(20),
+countycode varchar(2),
+taxrate Decimal(7,6));
