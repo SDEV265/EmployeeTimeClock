@@ -1,0 +1,4 @@
+create table tblstatetax(
+Id int auto_increment primary key,
+dependants int not null,
+weekly Decimal(4,2));
